@@ -227,39 +227,11 @@ export default function Header() {
               {t("nav.favorites")}
             </Link>
             <span className="text-yellow-400 text-lg">|</span>
-
-            {/* Все регионы */}
-            <button
-              onClick={() => setRegionMenuOpen(!regionMenuOpen)}
+            <Link
+              href="/vacancies"
               className="px-3 py-2 text-yellow-400 hover:text-white hover:scale-105 hover:underline underline-offset-4 transition-all duration-200 font-semibold cursor-pointer"
             >
-              {t("search.allRegions")}
-            </button>
-
-            {/* Animated burning line separator */}
-            <div className="relative h-6 w-8 group/line cursor-pointer">
-              <div className="absolute inset-y-1 left-1/2 w-[2px] -translate-x-1/2 overflow-hidden rounded-full">
-                <div
-                  className="absolute inset-[-100%] animate-[spin_1s_linear_infinite]"
-                  style={{
-                    background: 'conic-gradient(from 0deg, #facc15, #fff, #fef08a, #facc15)',
-                  }}
-                />
-              </div>
-              {/* Glow effect */}
-              <div className="absolute inset-y-0 left-1/2 w-4 -translate-x-1/2 bg-yellow-400/30 blur-md animate-pulse" />
-              <div className="absolute inset-y-1 left-1/2 w-1 -translate-x-1/2 bg-yellow-400/50 blur-sm animate-pulse" />
-            </div>
-
-            {/* Добавить организацию */}
-            <Link
-              href="/add-company"
-              className="px-3 py-2 text-yellow-400 hover:text-white hover:scale-105 hover:underline underline-offset-4 transition-all duration-200 font-semibold cursor-pointer flex items-center gap-1"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              {t("nav.addCompany")}
+              Вакансии
             </Link>
           </div>
 
