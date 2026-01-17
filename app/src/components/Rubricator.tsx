@@ -18,9 +18,9 @@ export default function Rubricator({ floating = true, inline = false }: Rubricat
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Fetch catalog when panel opens
-  useEffect(() => {
-    if (isOpen && !catalog) {
+  // Prefetch catalog function
+  const prefetchCatalog = () => {
+    if (!catalog && !loading) {
       setLoading(true);
       fetch("/api/ibiz/catalog")
         .then((r) => (r.ok ? r.json() : null))
@@ -32,7 +32,14 @@ export default function Rubricator({ floating = true, inline = false }: Rubricat
           setLoading(false);
         });
     }
-  }, [isOpen, catalog]);
+  };
+
+  // Fetch catalog when panel opens (fallback)
+  useEffect(() => {
+    if (isOpen && !catalog && !loading) {
+      prefetchCatalog();
+    }
+  }, [isOpen, catalog, loading]);
 
   // Close on Escape
   useEffect(() => {
@@ -73,6 +80,8 @@ export default function Rubricator({ floating = true, inline = false }: Rubricat
         <button
           type="button"
           onClick={handleToggle}
+          onMouseEnter={prefetchCatalog}
+          onFocus={prefetchCatalog}
           className="w-full bg-white rounded-2xl shadow-lg border border-gray-100 h-[56px] md:h-[68px] overflow-hidden
             hover:shadow-xl hover:scale-[1.02]
             transition-all duration-300"
@@ -131,8 +140,8 @@ export default function Rubricator({ floating = true, inline = false }: Rubricat
                 </button>
             </div>
 
-            {/* Categories list - responsive height */}
-            <div className="max-h-[50vh] sm:max-h-[400px] overflow-y-auto overscroll-contain overflow-x-hidden">
+            {/* Categories grid - like on biznes.lucheestiy.com */}
+            <div className="max-h-[60vh] sm:max-h-[500px] overflow-y-auto overscroll-contain overflow-x-hidden p-4">
               {loading ? (
                 <div className="flex items-center justify-center py-10">
                   <div className="w-10 h-10 border-4 border-[#820251] border-t-transparent rounded-full animate-spin" />
@@ -145,16 +154,24 @@ export default function Rubricator({ floating = true, inline = false }: Rubricat
                   <p className="text-base">{t("rubricator.notFound") || "Ничего не найдено"}</p>
                 </div>
               ) : (
-                <div className="py-1">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {categories.map((category) => (
-                    <CategoryItem
+                    <Link
                       key={category.slug}
-                      category={category}
-                      isExpanded={expandedCategories.has(category.slug)}
-                      onToggle={() => toggleCategory(category.slug)}
-                      onNavigate={() => setIsOpen(false)}
-                      t={t}
-                    />
+                      href={`/catalog/${category.slug}`}
+                      onClick={() => setIsOpen(false)}
+                      className="bg-gray-50 p-4 rounded-xl hover:shadow-lg transition-all text-center group border border-gray-100 hover:border-[#820251] hover:scale-105"
+                    >
+                      <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">
+                        {category.icon || "🏢"}
+                      </span>
+                      <span className="font-semibold text-gray-700 text-sm group-hover:text-[#820251] block leading-tight">
+                        {category.name}
+                      </span>
+                      <span className="text-xs text-gray-400 mt-1 block">
+                        {category.company_count} компаний
+                      </span>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -171,6 +188,8 @@ export default function Rubricator({ floating = true, inline = false }: Rubricat
       {/* Floating trigger button */}
       <button
         onClick={handleToggle}
+        onMouseEnter={prefetchCatalog}
+        onFocus={prefetchCatalog}
         className={`fixed left-4 bottom-24 z-40 w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center group ${
           isOpen
             ? "bg-white text-[#820251] shadow-xl ring-2 ring-[#820251]"
