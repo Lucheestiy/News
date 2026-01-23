@@ -86,7 +86,9 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
             text: s.name,
             url: s.url,
             icon: s.icon || (s.type === "category" ? "📁" : "📌"),
-            subtitle: s.type === "company" ? s.subtitle : s.category_name ? `${s.category_name} • ${s.count} компаний` : `${s.count} компаний`,
+            subtitle: s.type === "company" 
+              ? s.subtitle 
+              : ('category_name' in s && s.category_name ? `${s.category_name} • ${s.count} компаний` : `${s.count} компаний`),
             count: s.count,
           }))
           .slice(0, 8);
