@@ -13,7 +13,7 @@ interface SearchBarProps {
 }
 
 interface SearchSuggestion {
-  type: "company" | "category" | "subcategory";
+  type: "company" | "category" | "subcategory" | "rubric";
   text: string;
   url: string;
   icon: string;
