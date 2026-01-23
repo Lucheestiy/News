@@ -172,6 +172,7 @@ function buildCompanySummary(company: IbizCompany, regionSlug: string | null): I
     emails: company.emails || [],
     websites: company.websites || [],
     description: company.description || company.about || "",
+    about: company.about || "",
     logo_url: company.logo_url || "",
     primary_category_slug: primaryCategory?.slug ?? null,
     primary_category_name: primaryCategory?.name ?? null,
@@ -568,8 +569,9 @@ export async function ibizSuggest(params: {
       if (suggestions.length >= limit) break;
       const companyRegionSlug = store.companyRegionById.get(id) || null;
       if (!applyRegionAlias(params.region, companyRegionSlug)) continue;
-      const search = store.companySearchById.get(id) || "";
-      if (!search.includes(q)) continue;
+      // Search ONLY by company name, not by description/keywords
+      const name = summary.name || "";
+      if (!safeLower(name).includes(q)) continue;
       suggestions.push({
         type: "company",
         id,
