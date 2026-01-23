@@ -42,6 +42,10 @@ const translations: Record<Language, Record<string, string>> = {
     "search.find": "Найти",
     "search.results": "Результаты поиска",
     "search.found": "Найдено",
+    "search.foundForCompany": "Поиск по названию компании",
+    "search.foundForService": "Поиск по услуге",
+    "search.byCompany": "Название компании",
+    "search.byService": "Продукция и услуги",
     "search.service": "Услуга",
 
     // Main page

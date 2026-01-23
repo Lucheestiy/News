@@ -27,29 +27,137 @@ export default function Header() {
   return (
     <header className="bg-[#820251] text-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col gap-2 py-4">
-          <div className="relative flex items-center justify-center md:justify-between gap-4 flex-wrap">
-            {/* Mobile Menu Button - Absolute Right */}
+        {/* Mobile Header - Compact single row */}
+        <div className="md:hidden flex items-center justify-between py-2">
+          {/* Logo Left */}
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="relative w-10 h-10 flex-shrink-0">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <defs>
+                  <radialGradient id="globeRadialMobile" cx="30%" cy="30%" r="70%">
+                    <stop offset="0%" stopColor="#FEF3C7" />
+                    <stop offset="40%" stopColor="#FCD34D" />
+                    <stop offset="100%" stopColor="#D97706" />
+                  </radialGradient>
+                </defs>
+                <circle cx="40" cy="40" r="22" fill="url(#globeRadialMobile)" />
+                <ellipse cx="40" cy="40" rx="22" ry="8" stroke="white" strokeWidth="0.8" fill="none" opacity="0.5" />
+                <ellipse cx="40" cy="40" rx="14" ry="22" stroke="white" strokeWidth="0.8" fill="none" opacity="0.5" />
+                <path d="M30 34 Q36 30 44 34 Q48 38 46 42 Q42 44 36 42 Q30 40 30 36Z" fill="#9D174D" opacity="0.7" />
+              </svg>
+            </div>
+            <span className="text-lg font-bold">
+              <span className="text-yellow-400">Biznesinfo</span>
+              <span className="text-white">.by</span>
+            </span>
+          </Link>
+
+          {/* Right side - Region, Lang, Menu */}
+          <div className="flex items-center gap-1">
+            {/* Region Button - Compact */}
+            <button
+              onClick={() => setRegionMenuOpen(!regionMenuOpen)}
+              className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white/10 text-white text-xs"
+            >
+              <svg className="w-3.5 h-3.5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="max-w-[60px] truncate">{selectedRegion ? regionName.split(' ')[0] : t("search.allRegions").split(' ')[0]}</span>
+            </button>
+
+            {/* Language Button - Compact */}
+            <button
+              onClick={() => setLangMenuOpen(!langMenuOpen)}
+              className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 text-yellow-400 text-xs font-bold"
+            >
+              {currentLang.flag}
+            </button>
+
+            {/* Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden absolute right-0 text-white p-2"
+              className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 text-white"
             >
               {mobileMenuOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               )}
             </button>
+          </div>
+        </div>
 
-            {/* Logo - Centered on Mobile, Left-aligned on Desktop */}
-            <div className="w-full md:w-auto flex justify-center md:justify-start md:-ml-4 lg:-ml-8">
+        {/* Mobile Region Dropdown */}
+        {regionMenuOpen && (
+          <div className="md:hidden">
+            <div className="fixed inset-0 z-10" onClick={() => setRegionMenuOpen(false)} />
+            <div className="absolute left-4 right-4 top-14 z-20 bg-white rounded-xl shadow-2xl py-2 max-h-[60vh] overflow-y-auto">
+              <button
+                onClick={() => {
+                  setSelectedRegion(null);
+                  setRegionMenuOpen(false);
+                }}
+                className={`w-full px-4 py-2.5 text-left text-sm ${
+                  !selectedRegion ? "text-[#820251] font-bold bg-gray-50" : "text-gray-700"
+                }`}
+              >
+                {t("search.allRegions")}
+              </button>
+              {regions.map((region) => (
+                <button
+                  key={region.slug}
+                  onClick={() => {
+                    setSelectedRegion(region.slug);
+                    setRegionMenuOpen(false);
+                  }}
+                  className={`w-full px-4 py-2 text-left text-sm ${
+                    selectedRegion === region.slug ? "text-[#820251] font-bold bg-gray-50" : "text-gray-700"
+                  } ${region.isCity ? "font-medium" : "pl-6 text-gray-500 text-xs"}`}
+                >
+                  {t(`region.${region.slug}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Language Dropdown */}
+        {langMenuOpen && (
+          <div className="md:hidden">
+            <div className="fixed inset-0 z-10" onClick={() => setLangMenuOpen(false)} />
+            <div className="absolute right-4 top-14 z-20 bg-white rounded-xl shadow-2xl py-2 w-40">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => {
+                    setLanguage(lang.code);
+                    setLangMenuOpen(false);
+                  }}
+                  className={`w-full px-4 py-2.5 text-left text-sm flex items-center gap-2 ${
+                    language === lang.code ? "text-[#820251] font-bold bg-gray-50" : "text-gray-700"
+                  }`}
+                >
+                  <span>{lang.flag}</span>
+                  <span>{lang.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Desktop Header */}
+        <div className="hidden md:flex flex-col gap-2 py-4">
+          <div className="relative flex items-center justify-between gap-4 flex-wrap">
+            {/* Logo - Left-aligned on Desktop */}
+            <div className="flex justify-start -ml-4 lg:-ml-8">
               <Link href="/" className="flex items-center gap-4 group">
                 {/* Professional Globe Logo - Interactive */}
-                <div className="relative w-20 h-20 md:w-28 md:h-28 flex-shrink-0 group/logo">
+                <div className="relative w-28 h-28 flex-shrink-0 group/logo">
                   {/* Animated glow aura */}
                   <div className="absolute inset-0 rounded-full bg-yellow-400/20 blur-xl animate-pulse" />
                   <div className="absolute inset-[-4px] rounded-full bg-gradient-to-r from-yellow-400/10 via-pink-400/10 to-yellow-400/10 blur-lg animate-spin" style={{animationDuration: '10s'}} />
@@ -142,7 +250,7 @@ export default function Header() {
 
                 {/* Logo Text - Interactive */}
                 <div className="relative group/text">
-                  <div className="text-3xl md:text-4xl font-bold tracking-tight transition-all duration-300 group-hover/text:scale-105">
+                  <div className="text-4xl font-bold tracking-tight transition-all duration-300 group-hover/text:scale-105">
                     <span className="text-yellow-400 drop-shadow-sm group-hover/text:text-yellow-300 group-hover/text:drop-shadow-[0_0_10px_rgba(250,204,21,0.6)] transition-all duration-300">Biznesinfo</span>
                     <span className="text-white group-hover/text:text-yellow-100 transition-colors duration-300">.by</span>
                   </div>
@@ -151,7 +259,7 @@ export default function Header() {
             </div>
 
             {/* Login Button - Right side on Desktop */}
-            <div className="hidden md:flex items-center gap-3 -mr-4 lg:-mr-12 xl:-mr-20">
+            <div className="flex items-center gap-3 -mr-4 lg:-mr-12 xl:-mr-20">
               <Link
                 href="/cabinet"
                 className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#820251] px-6 py-2.5 rounded-full font-bold hover:from-white hover:to-white hover:text-[#820251] transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer"
@@ -214,7 +322,7 @@ export default function Header() {
           </div>
 
           {/* Navigation - Centered above region/language */}
-          <div className="hidden md:flex items-center gap-4 text-base justify-center -mt-4">
+          <div className="flex items-center gap-4 text-base justify-center -mt-4">
             <Link href="/#news" className="px-3 py-2 text-yellow-400 hover:text-white hover:scale-105 hover:underline underline-offset-4 transition-all duration-200 font-semibold cursor-pointer">
               {t("nav.news")}
             </Link>

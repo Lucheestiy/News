@@ -13,28 +13,70 @@ import type { IbizCompanySummary, IbizSearchResponse } from "@/lib/ibiz/types";
 import { formatCompanyCount } from "@/lib/utils/plural";
 import Pagination from "@/components/Pagination";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const PAGE_SIZE = 10;
+
+// Toggle component for switching between company and service search
+function SearchToggle({ active, onChange }: { active: "company" | "service"; onChange: (v: "company" | "service") => void }) {
+  const { t } = useLanguage();
+  return (
+    <div className="flex bg-white/20 rounded-lg p-1 mb-4 w-fit">
+      <button
+        onClick={() => onChange("company")}
+        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          active === "company" ? "bg-white text-[#820251]" : "text-white hover:bg-white/10"
+        }`}
+      >
+        {t("search.byCompany")}
+      </button>
+      <button
+        onClick={() => onChange("service")}
+        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          active === "service" ? "bg-white text-[#820251]" : "text-white hover:bg-white/10"
+        }`}
+      >
+        {t("search.byService")}
+      </button>
+    </div>
+  );
+}
 
 function SearchResults() {
   const searchParams = useSearchParams();
   const { t } = useLanguage();
   const { selectedRegion, setSelectedRegion, regionName } = useRegion();
+  const router = useRouter();
 
   const query = searchParams.get("q") || "";
+  const serviceQuery = searchParams.get("service") || "";
   const keywords = searchParams.get("keywords") || "";
 
   const [data, setData] = useState<IbizSearchResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchMode, setSearchMode] = useState<"company" | "service">(() => {
+    // Detect mode from URL params
+    if (searchParams.get("service")) return "service";
+    return "company";
+  });
+
+  // Update search mode when URL params change
+  useEffect(() => {
+    if (searchParams.get("service")) {
+      setSearchMode("service");
+    } else {
+      setSearchMode("company");
+    }
+  }, [searchParams]);
 
   // Reset page when query or region changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [query, keywords, selectedRegion]);
+  }, [query, serviceQuery, keywords, selectedRegion]);
 
   const fetchSearch = (page: number) => {
-    const q = query.trim();
+    const q = searchMode === "company" ? query.trim() : serviceQuery.trim();
     const kw = keywords.trim();
     if (!q && !kw) {
       setData(null);
@@ -45,7 +87,7 @@ function SearchResults() {
     setIsLoading(true);
     const region = selectedRegion || "";
     const params = new URLSearchParams();
-    if (q) params.set("q", q);
+    if (q) params.set(searchMode === "company" ? "q" : "service", q);
     if (kw) params.set("keywords", kw);
     if (region) params.set("region", region);
     params.set("offset", String((page - 1) * PAGE_SIZE));
@@ -70,7 +112,7 @@ function SearchResults() {
 
   useEffect(() => {
     fetchSearch(currentPage);
-  }, [currentPage, query, keywords, selectedRegion]);
+  }, [currentPage, query, serviceQuery, keywords, selectedRegion, searchMode]);
 
   const totalPages = data ? Math.ceil((data.total || 0) / PAGE_SIZE) : 0;
 
@@ -86,16 +128,26 @@ function SearchResults() {
 
   const categoriesWithResults = Object.keys(grouped);
 
+  const handleSearchModeChange = (mode: "company" | "service") => {
+    setSearchMode(mode);
+    const currentQuery = mode === "company" ? serviceQuery : query;
+    const params = new URLSearchParams();
+    if (currentQuery) params.set(mode === "company" ? "service" : "q", currentQuery);
+    if (selectedRegion) params.set("region", selectedRegion);
+    router.push(`/search?${params.toString()}`);
+  };
+
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-100">
       <Header />
 
       <main className="flex-grow">
-        {/* Search Header */}
+        {/* Search Header with Toggle */}
         <div className="bg-gradient-to-r from-[#820251] to-[#5a0138] text-white py-8">
           <div className="container mx-auto px-4">
             <h1 className="text-2xl font-bold mb-4">{t("search.results")}</h1>
-            <SearchBar variant={query.trim() ? "compact" : "compactKeywords"} />
+            <SearchToggle active={searchMode} onChange={handleSearchModeChange} />
+            <SearchBar variant={query.trim() || serviceQuery.trim() ? "compact" : "compactKeywords"} />
           </div>
         </div>
 
@@ -131,13 +183,22 @@ function SearchResults() {
 
         {/* Results */}
         <div className="container mx-auto py-10 px-4">
-          {(query || keywords) && (
+          {/* Query info with search mode */}
+          {(query || serviceQuery || keywords) && (
             <div className="mb-6">
               <p className="text-gray-600">
-                {t("search.results")}:{" "}
-                {query && <span className="font-semibold text-gray-800">«{query}»</span>}
+                {searchMode === "company" && query && (
+                  <>
+                    {t("search.byCompany")}: <span className="font-semibold text-gray-800">«{query}»</span>
+                  </>
+                )}
+                {searchMode === "service" && serviceQuery && (
+                  <>
+                    {t("search.byService")}: <span className="font-semibold text-[#820251]">«{serviceQuery}»</span>
+                  </>
+                )}
                 {query && keywords && " + "}
-                {keywords && <span className="font-semibold text-[#820251]">«{keywords}»</span>}
+                {keywords && <span className="font-semibold text-gray-800">«{keywords}»</span>}
                 {selectedRegion && <span className="text-gray-500"> — {regionName}</span>}
               </p>
               <p className="text-sm text-gray-500 mt-1">
@@ -148,7 +209,7 @@ function SearchResults() {
 
           {isLoading ? (
             <div className="bg-white rounded-lg p-10 text-center text-gray-500">{t("common.loading")}</div>
-          ) : !query && !keywords ? (
+          ) : !query && !serviceQuery && !keywords ? (
             <div className="bg-white rounded-lg p-10 text-center text-gray-500">
               {t("search.placeholder")}
             </div>
