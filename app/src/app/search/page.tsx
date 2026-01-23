@@ -10,6 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useRegion } from "@/contexts/RegionContext";
 import { regions } from "@/data/regions";
 import type { IbizCompanySummary, IbizSearchResponse } from "@/lib/ibiz/types";
+import { formatCompanyCount } from "@/lib/utils/plural";
 import Link from "next/link";
 
 function SearchResults() {
@@ -39,7 +40,7 @@ function SearchResults() {
     if (kw) params.set("keywords", kw);
     if (region) params.set("region", region);
     params.set("offset", "0");
-    params.set("limit", "60");
+    params.set("limit", "10");
 
     fetch(`/api/ibiz/search?${params.toString()}`)
       .then((r) => (r.ok ? r.json() : null))
@@ -125,7 +126,7 @@ function SearchResults() {
                 {selectedRegion && <span className="text-gray-500"> — {regionName}</span>}
               </p>
               <p className="text-sm text-gray-500 mt-1">
-                {t("search.found")}: {isLoading ? "…" : (data?.total ?? 0)} {t("catalog.companies").toLowerCase()}
+                {t("search.found")}: {isLoading ? "…" : formatCompanyCount(data?.total ?? 0)}
               </p>
             </div>
           )}
