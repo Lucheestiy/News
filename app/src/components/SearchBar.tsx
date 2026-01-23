@@ -89,7 +89,7 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
             subtitle: s.type === "company" 
               ? s.subtitle 
               : ('category_name' in s && s.category_name ? `${s.category_name} • ${s.count} компаний` : `${s.count} компаний`),
-            count: s.count,
+            count: 'count' in s ? s.count : undefined,
           }))
           .slice(0, 8);
 
