@@ -41,7 +41,7 @@ export async function GET(request: Request) {
           url: `/catalog/${cat.slug}/${rubric.slug.split("/").slice(1).join("/")}`,
           icon: null,
           category_name: cat.name,
-          count: rubric.company_count,
+          count: rubric.count,
         });
       }
     }
