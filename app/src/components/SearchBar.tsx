@@ -134,8 +134,13 @@ export default function SearchBar({ variant = "hero" }: SearchBarProps) {
     if (companyName) {
       params.set("q", companyName);
     }
-    // Services + keywords share the same keywords field so the second page reflects the input
-    const keywords = [serviceQuery.trim(), keywordsQuery.trim()].filter(Boolean).join(" ");
+    // Service/products search (separate from keywords)
+    const service = serviceQuery.trim();
+    if (service) {
+      params.set("service", service);
+    }
+    // Keywords (additional filter)
+    const keywords = keywordsQuery.trim();
     if (keywords) {
       params.set("keywords", keywords);
     }
