@@ -16,8 +16,9 @@ export async function GET(request: Request) {
   
   const suggestions = [];
   
-  // Search categories
+  // Search categories and their nested rubrics
   for (const cat of categories) {
+    // Check if category name matches
     if (safeLower(cat.name || "").includes(q)) {
       suggestions.push({
         type: "category",
@@ -28,22 +29,21 @@ export async function GET(request: Request) {
         count: cat.company_count,
       });
     }
-  }
-  
-  // Search rubrics within matching categories
-  const catalogRubrics = catalog.rubrics || [];
-  for (const rubric of catalogRubrics) {
-    if (safeLower(rubric.name || "").includes(q)) {
-      // Only include if parent category matched or we want all rubrics
-      suggestions.push({
-        type: "rubric",
-        slug: rubric.slug,
-        name: rubric.name || rubric.slug,
-        url: `/catalog/${rubric.category_slug}/${rubric.slug.split("/").slice(1).join("/")}`,
-        icon: null,
-        category_name: rubric.category_name,
-        count: rubric.company_count,
-      });
+    
+    // Check nested rubrics within this category
+    const rubrics = cat.rubrics || [];
+    for (const rubric of rubrics) {
+      if (safeLower(rubric.name || "").includes(q)) {
+        suggestions.push({
+          type: "rubric",
+          slug: rubric.slug,
+          name: rubric.name || rubric.slug,
+          url: `/catalog/${cat.slug}/${rubric.slug.split("/").slice(1).join("/")}`,
+          icon: null,
+          category_name: cat.name,
+          count: rubric.company_count,
+        });
+      }
     }
   }
 
@@ -53,7 +53,6 @@ export async function GET(request: Request) {
   });
 }
 
-// Helper function (same as in store.ts)
 function safeLower(s: string): string {
   return (s || "").toLowerCase();
 }
